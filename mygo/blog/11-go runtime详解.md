@@ -1,0 +1,3 @@
+* Go语言程序是编译为机器代码来执行的。Go提供了一些高级的功能，如goroutine, channel, 以及Garbage collection。这些高级功能需要一个runtime的支持。runtime和用户编译后的代码被linker静态链接起来，形成一个可执行文件。这个文件从操作系统角度来说是一个user space的独立的可执行文件。从运行的角度来说，这个文件由2部分组成，一部分是用户的代码，另一部分就是runtime。
+* runtime包含Go运行时的系统交互的操作，例如控制goruntine的功能。还有debug，pprof进行排查问题和运行时性能分析，tracer来抓取异常事件信息，如 goroutine的创建，加锁解锁状态，系统调用进入推出和锁定还有GC相关的事件，堆栈大小的改变以及进程的退出和开始事件等等；race进行竞态关系检查以及CGO的实现。
+* 总的来说运行时是调度器和GC

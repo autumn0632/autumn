@@ -1,0 +1,2 @@
+* Go语言程序是编译为机器代码来执行的。Go提供了一些高级的功能，如goroutine, channel, 以及Garbage collection。这些高级功能需要一个runtime的支持。runtime和用户编译后的代码被linker静态链接起来，形成一个可执行文件。这个文件从操作系统角度来说是一个user space的独立的可执行文件。从运行的角度来说，这个文件由2部分组成，一部分是用户的代码，另一部分就是runtime。
+* 

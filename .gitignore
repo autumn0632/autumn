@@ -1,3 +1,4 @@
+docker/etcd/data
 .idea
 .DS_Store
 *.[56789ao]

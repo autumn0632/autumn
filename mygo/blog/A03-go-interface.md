@@ -11,7 +11,7 @@
 
 * **两种接口**
 
-  > 一种是带有一组方法的接口，另一种是不带任何方法的 `interface{}`。Go 语言使用 `iface` 结构体表示第一种接口，使用 `eface` 结构体表示第二种空接口。由于后者在 Go 语言中非常常见，所以在实现时使用了特殊的类型。
+  > 一种是带有一组方法的接口，另一种是不带任何方法的 `interface{}`。Go 语言使用 `iface` 结构体表示第一种接口，使用 `eface` 结构体表示第二种空接口(由于空结构体在 Go 语言中非常常见，所以在实现时使用了特殊的类型。)
 
 * **结构体、指针和接口**
 
@@ -38,6 +38,7 @@
   >   
   >   type Cat struct{}
   >   
+  >   // 使用指针实现接口
   >   func (c *Cat) Quack() {
   >   	fmt.Println("meow")
   >   }
@@ -47,9 +48,12 @@
   >   	c.Quack()
   >   }
   >   
-  >   ```
-  >
+  > ```
   >   
+  > * 结构体接收者和指针接收者的不同
+  >
+  >   * 结构指针接收者会在方法内部改变该结构内部变量的值；而结构体接受者在方法内部对变量的改变不会影响该结构
+  >   * 避免在每次调用方法时复制该值，在值的类型为大型结构体时，这样做会更加高效。
 
 * **nil != nil**
 
@@ -84,47 +88,51 @@
   
 * **数据结构**
 
+  > **iface：包含接口的接口**
+  >
   > ```go
-  > // 空接口类型
-  > type eface struct { // 16 bytes
-  > 	_type *_type
-  > 	data  unsafe.Pointer
-  > }
-  > 
   > // 包含一组方法的接口类型
   > type iface struct { // 16 bytes
+  >   // 接口的类型以及赋给这个接口的实体类型
   > 	tab  *itab
+  >   // data 则指向接口具体的值，一般而言是一个指向堆内存的指针。
   > 	data unsafe.Pointer
   > }
-  > 
-  > ```
-  >
-  > `_type`和`itab`类型
-  >
-  > ```go
-  > // _type 是 Go 语言类型的运行时表示。包含了很多元信息，例如：类型的大小、哈希、对齐以及种类等。
-  > type _type struct {
-  > 	size       uintptr
-  > 	ptrdata    uintptr
-  > 	hash       uint32
-  > 	tflag      tflag
-  > 	align      uint8
-  > 	fieldAlign uint8
-  > 	kind       uint8
-  > 	equal      func(unsafe.Pointer, unsafe.Pointer) bool
-  > 	gcdata     *byte
-  > 	str        nameOff
-  > 	ptrToThis  typeOff
+  > // itab 结构体是接口类型的核心组成部分，每一个 itab 都占 32 字节的空间，我们可以将其看成接口类型和具体类型的组合，它们分别用 inter 和 _type 两个字段表示：
+  > type itab struct {
+  >   // 描述了接口的类型
+  >     inter  *interfacetype
+  >   //描述了实体的类型，包括内存对齐方式，大小等
+  >     _type  *_type
+  >     link   *itab
+  >   //hash 是对 _type.hash 的拷贝，当我们想将 interface 类型转换成具体类型时，可以使用该字段快速判断目标类型和具体类型 _type 是否一致；
+  >     hash   uint32 // copy of _type.hash. Used for type switches.
+  >     bad    bool   // type does not implement interface
+  >     inhash bool   // has this itab been added to hash?
+  >     unused [2]byte
+  >   //放置和接口方法对应的具体数据类型的方法地址，实现接口调用方法的动态分派
+  >     fun    [1]uintptr // variable sized
   > }
   > 
-  > // itab 结构体是接口类型的核心组成部分，每一个 itab 都占 32 字节的空间，我们可以将其看成接口类型和具体类型的组合，它们分别用 inter 和 _type 两个字段表示：
-  > type itab struct { // 32 bytes
-  > 	inter *interfacetype
-  > 	_type *_type
-  >   //hash 是对 _type.hash 的拷贝，当我们想将 interface 类型转换成具体类型时，可以使用该字段快速判断目标类型和具体类型 _type 是否一致；
-  > 	hash  uint32
-  > 	_     [4]byte
-  > 	fun   [1]uintptr
+  > type interfacetype struct {
+  >     typ     _type
+  >     pkgpath name
+  >     mhdr    []imethod
+  > }
+  > ```
+  >
+  > ![](./png/iface.png)
+
+  
+
+  > **eface：空接口类型**
+  >
+  > 只维护了一个 `_type` 字段，表示空接口所承载的具体的实体类型。`data` 描述了具体的值。
+  >
+  > ```go
+  > type eface struct {
+  >     _type *_type
+  >     data  unsafe.Pointer
   > }
   > ```
 
@@ -180,4 +188,3 @@
   > }
   > ```
   >
-  > 

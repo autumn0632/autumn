@@ -6,14 +6,16 @@ A系列：go 基础
 [04. go context 详解](mygo/blog/A04-go-reflect.md)\
 [05. go gin 框架使用](mygo/blog/A05-go-gin.md)
 
-B系列：python 笔记
+B系列：go 高阶
 
-B系列：数据库技术
+C系列：python 笔记
 
-C系列：网络技术
+D系列：数据库技术
+
+[01. redis 基础](mygo/blog/D01-redis-01.md)
+
+E系列：网络技术
 
 [01. IO 模型](mygo/blog/C01-IO.md)
 
-D系列：Docker技术
-
-E系列：go 高级
+F系列：Docker技术

@@ -3,7 +3,8 @@ A系列：go 基础
 [01. go module 详解](mygo/blog/A01-go-module.md)\
 [02. go context 详解](mygo/blog/A02-go-context.md)\
 [03. go interface 详解](mygo/blog/A03-go-interface.md)\
-[04. go context 详解](mygo/blog/A04-go-reflect.md)
+[04. go context 详解](mygo/blog/A04-go-reflect.md)\
+[05. go gin 框架使用](mygo/blog/A05-go-gin.md)
 
 B系列：python 笔记
 

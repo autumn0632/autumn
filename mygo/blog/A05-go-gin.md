@@ -158,7 +158,7 @@
    >     c.JSON(http.StatusOK, gin.H{"message": "hey", "status": http.StatusOK}) 
    >
 
-10. 请求声明周期
+10. **请求生命周期**
 
    golang原生为web而生而提供了完善的功能，gin能做的事情也是把 `ServeHTTP(ResponseWriter, *Request)` 做得高效、友好。一个请求来到服务器了，`ServeHTTP` 会被调用，gin做的事情包括：
 
@@ -171,7 +171,7 @@
 
 ## 1. Context 结构体
 
-`context.go`  包含主体功能代码，包含了** HTTP 请求上下文全部处理过程, `request` 和 `response` 两部分.**
+`context.go`  包含主体功能代码，包含了**HTTP 请求上下文全部处理过程, `request` 和 `response` 两部分.**
 
 **Context作为一个数据结构在中间件中传递本次请求的各种数据、管理流程，进行响应**
 
@@ -241,67 +241,69 @@ type responseWriter struct {
 type errorMsgs []*Error
 
 
-// 每当一个请求来到服务器，都会从对象池中拿到一个context。其函数有：
-// **** 创建
-reset()                 //从对象池中拿出来后需要初始化
-Copy() *Context         //克隆，用于goroute中
-HandlerName() string    //得到最后那个处理者的名字
-Handler()               //得到最后那个Handler
+// 每当一个请求来到服务器，都会从对象池中拿到一个context。其方法有：
 
-// **** 流程控制
-Next()                  // 只能在中间件中使用，依次调用各个处理者
-IsAborted() bool    
-Abort()                 // 废弃
-AbortWithStatusJson(code int, jsonObj interface{})
-AbortWithError(code int, err error) *Error
+// **** 创建 ****
+func (c *Context) reset()                 //从对象池中拿出来后需要初始化
+func (c *Context) Copy() *Context         //克隆，用于goroute中
+func (c *Context) HandlerName() string    //得到最后那个处理者的名字
+func (c *Context) Handler()               //得到最后那个Handler
+
+
+// **** 流程控制 ****
+func (c *Context) Next()                  // 只能在中间件中使用，从调用处直接跳转到下一个handler执行
+func (c *Context) IsAborted() bool    
+func (c *Context) Abort()                 // 废弃
+func (c *Context) AbortWithStatusJson(code int, jsonObj interface{})
+func (c *Context) AbortWithError(code int, err error) *Error
 
 // **** 错误管理
-Error(err error) *Error // 给本次请求添加个错误。将错误收集然后用中间件统一处理（打日志|入库）是一个比较好的方案
+func (c *Context) Error(err error) *Error // 给本次请求添加个错误。将错误收集然后用中间件统一处理（打日志|入库）是一个比较好的方案
 
 // **** 元数据管理 ****
-Set(key string, value interface{})  //本次请求用户设置各种数据 (Keys 字段)
-Get(key string)(value interface{}, existed bool)
-MustGet(key string)(value interface{})
-GetString(key string) string
-GetBool(key string) bool
-GetInt(key string) int
-GetInt64(key string) int64
-GetFloat64(key string) float64
-GetTime(key string) time.Time
-GetDuration(key string) time.Duration
-GetStringSlice(key string) []string
-GetStringMap(key string) map[string]interface{}
-GetStringMapString(key string) map[string]string
-GetStringMapStringSlice(key string) map[string][]string
+func (c *Context) Set(key string, value interface{})  //本次请求用户设置各种数据 (Keys 字段)
+func (c *Context) Get(key string)(value interface{}, existed bool)
+func (c *Context) MustGet(key string)(value interface{})
+func (c *Context) GetString(key string) string
+func (c *Context) GetBool(key string) bool
+func (c *Context) GetInt(key string) int
+func (c *Context) GetInt64(key string) int64
+func (c *Context) GetFloat64(key string) float64
+func (c *Context) GetTime(key string) time.Time
+func (c *Context) GetDuration(key string) time.Duration
+func (c *Context) GetStringSlice(key string) []string
+func (c *Context) GetStringMap(key string) map[string]interface{}
+func (c *Context) GetStringMapString(key string) map[string]string
+func (c *Context) GetStringMapStringSlice(key string) map[string][]string
 
 // **** 输入数据 ****
-//从URL中拿值，比如 /user/:id => /user/john
-Param(key string) string    
+//从URL中拿值（URL参数），比如 /user/:id => /user/john
+func (c *Context) Param(key string) string
 
 //从GET参数中拿值，比如 /path?id=john
-GetQueryArray(key string) ([]string, bool)  
-GetQuery(key string)(string, bool)
-Query(key string) string
-DefaultQuery(key, defaultValue string) string
-GetQueryArray(key string) ([]string, bool)
-QueryArray(key string) []string
+func (c *Context) GetQueryArray(key string) ([]string, bool)  
+func (c *Context) GetQuery(key string)(string, bool)
+func (c *Context) Query(key string) string
+func (c *Context) DefaultQuery(key, defaultValue string) string
+func (c *Context) GetQueryArray(key string) ([]string, bool)
+func (c *Context) QueryArray(key string) []string
 
 //从POST中拿数据
-GetPostFormArray(key string) ([]string, bool)
-PostFormArray(key string) []string 
-GetPostForm(key string) (string, bool)
-PostForm(key string) string
-DefaultPostForm(key, defaultValue string) string
+func (c *Context) GetPostFormArray(key string) ([]string, bool)
+func (c *Context) PostFormArray(key string) []string 
+func (c *Context) GetPostForm(key string) (string, bool)
+func (c *Context) PostForm(key string) string
+func (c *Context) DefaultPostForm(key, defaultValue string) string
 
 // 文件
-FormFile(name string) (*multipart.FileHeader, error)
-MultipartForm() (*multipart.Form, error)
-SaveUploadedFile(file *multipart.FileHeader, dst string) error
+func (c *Context) FormFile(name string) (*multipart.FileHeader, error)
+func (c *Context) MultipartForm() (*multipart.Form, error)
+func (c *Context) SaveUploadedFile(file *multipart.FileHeader, dst string) error
 
 // 数据绑定
-Bind(obj interface{}) error //根据Content-Type绑定数据
-BindJSON(obj interface{}) error
-BindQuery(obj interface{}) error
+func (c *Context) Bind(obj interface{}) error //根据Content-Type绑定数据
+func (c *Context) BindJSON(obj interface{}) error
+func (c *Context) BindQuery(obj interface{}) error
 
 //--- Should ok, else return error
 ShouldBindJSON(obj interface{}) error 
@@ -317,14 +319,14 @@ ContentType() string
 IsWebsocket() bool
 
 // **** 设置输出数据 ****
-Status(code int)            // 设置response code
-Header(key, value string)   // 设置header
-GetHeader(key string) string
+func (c *Context) Status(code int)            // 设置response code
+func (c *Context) Header(key, value string)   // 设置header
+func (c *Context) GetHeader(key string) string
 
-GetRawData() ([]byte, error)
+func (c *Context) GetRawData() ([]byte, error)
 
-Cookie(name string) (string, error)     // 设置cookie
-SetCookie(name, value string, maxAge int, path, domain string, secure, httpOnly bool)
+func (c *Context) Cookie(name string) (string, error)     // 设置cookie
+func (c *Context) SetCookie(name, value string, maxAge int, path, domain string, secure, httpOnly bool)
 
 Render(code int, r render.Render)      // 数据渲染
 HTML(code int, name string, obj interface{})    //HTML
@@ -347,16 +349,24 @@ Stream(step func(w io.Writer) bool)             // stream
 
 
 
-## 2. 路由（Router）
+## 2. 路由添加（RouterGroup）
 
-gin 的高效，很大一部分是说其路由效率。
+gin 的高效，很大一部分是说其路由效率。`routergroup.go`包含主要代码逻辑
 
 ```go 
-// 路由API
+// 路由API，负责加入路由
+
+// routergroup.go:15
+type IRouter interface {
+    IRoutes
+    Group(string, ...HandlerFunc) *RouterGroup
+}
 // routergroup.go:20
 type IRoutes interface {
+  	// 将middleware加入中间件
     Use(handlers ...HandlerFunc) IRoutes
 
+  	//Handle registers a new request handle and middleware with the given path and method.
     Handle(httpMethod, relativePath string, handlers ...HandlerFunc) IRoutes
     Any(relativePath string, handlers ...HandlerFunc) IRoutes
     GET(relativePath string, handlers ...HandlerFunc) IRoutes
@@ -372,10 +382,55 @@ type IRoutes interface {
     StaticFS(relativePath string, fs http.FileSystem) IRoutes
 }
 
-// routergroup.go:15
-type IRouter interface {
-    IRoutes
-    Group(string, ...HandlerFunc) *RouterGroup
+// RouterGroup 用来配置路由的。
+type RouterGroup struct {
+	Handlers HandlersChain
+	basePath string
+	engine   *Engine
+	root     bool
+}
+
+var _ IRouter = &RouterGroup{}
+```
+
+## 3. 路由查找
+
+`gin.go`初始化engine实例，监听服务，以及进行路由查找，执行处理逻辑
+
+```go
+//1. e := gin.New()/ gin.Default()
+//2. e.Use() // 添加中间件
+//3. e.PUT() // 路由注册
+//4. r.Run() //服务监听
+
+func (engine *Engine) Run(addr ...string) (err error) {
+	defer func() { debugPrintError(err) }()
+
+	// 解析地址端口
+	address := resolveAddress(addr)
+	debugPrint("Listening and serving HTTP on %s\n", address)
+
+	// 调用 go原生的net/http服务, 重点在第二个参数
+	// engine 为实现了handler接口（ServeHTTP(ResponseWriter, *Request)）的数据类型
+	err = http.ListenAndServe(address, engine)
+	return
+}
+
+// ServeHTTP conforms to the http.Handler interface.
+func (engine *Engine) ServeHTTP(w http.ResponseWriter, req *http.Request) {
+	// 从临时对象池中取出对象
+	//类型转换：interface{} => *Context
+	c := engine.pool.Get().(*Context)
+	// 响应初始化
+	c.writermem.reset(w)
+	c.Request = req
+	c.reset()
+
+  // 逻辑处理入口：在基树中查找http 方法对应的handler执行
+	engine.handleHTTPRequest(c)
+
+	// 将对象放入临时对象池
+	engine.pool.Put(c)
 }
 ```
 

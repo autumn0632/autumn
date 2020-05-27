@@ -5,7 +5,7 @@ A系列：go 基础
 [03. go interface 详解](mygo/blog/A03-go-interface.md)\
 [04. go context 详解](mygo/blog/A04-go-reflect.md)\
 [05. go gin 框架使用](mygo/blog/A05-go-gin.md)
-
+[06. go sync 模块详解]
 B系列：go 高阶
 
 C系列：python 笔记

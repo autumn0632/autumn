@@ -16,11 +16,11 @@ C系列：python 笔记
 
 D系列：数据库技术
 
-[01. redis 基础](mygo/blog/D01-redis-01.md)\
-[02. mysql 基础](mygo/blog/D02-mysql-01.md)
+[01. redis 基础](go/blog/D01-redis-01.md)\
+[02. mysql 基础](go/blog/D02-mysql-01.md)
 
 E系列：网络技术
 
-[01. IO 模型](mygo/blog/C01-IO.md)
+[01. IO 模型](go/blog/C01-IO.md)
 
 F系列：Docker技术

@@ -10,6 +10,7 @@ A系列：go 基础
 [08. go 测试方法之pprof](go/blog/A08-go-pprof.md)
 
 
+
 B系列：go 高阶
 
 C系列：python 笔记
@@ -19,8 +20,14 @@ D系列：数据库技术
 [01. redis 基础](go/blog/D01-redis-01.md)\
 [02. mysql 基础](go/blog/D02-mysql-01.md)
 
-E系列：网络技术
+E系列：Linux操作系统
 
-[01. IO 模型](go/blog/C01-IO.md)
+E1:Linux性能优化
+
+[01: 学习LLinux性能优化是在学什么](linux/performance/01-学Linux性能是在学什么？.md)
+
+E2:Linux网络
+
+[01.IO 模型](go/blog/C01-IO.md)
 
 F系列：Docker技术

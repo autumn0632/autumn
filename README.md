@@ -10,7 +10,6 @@ A系列：go 基础
 [08. go 测试方法之pprof](go/blog/A08-go-pprof.md)
 
 
-
 B系列：go 高阶
 
 C系列：python 笔记
@@ -25,6 +24,8 @@ E系列：Linux操作系统
 E1:Linux性能优化
 
 [01: 学习LLinux性能优化是在学什么](linux/performance/01-学Linux性能是在学什么？.md)
+[02: CPU篇](linux/performance/02-cpu性能篇.md)
+[03: 内存篇](linux/performance/03-内存篇.md)
 
 E2:Linux网络
 

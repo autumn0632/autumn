@@ -23,8 +23,8 @@ E系列：Linux操作系统
 
 E1:Linux性能优化
 
-[01: 学习LLinux性能优化是在学什么](linux/performance/01-学Linux性能是在学什么？.md)
-[02: CPU篇](linux/performance/02-cpu性能篇.md)
+[01: 学习LLinux性能优化是在学什么](linux/performance/01-学Linux性能是在学什么？.md)\
+[02: CPU篇](linux/performance/02-cpu性能篇.md)\
 [03: 内存篇](linux/performance/03-内存篇.md)
 
 E2:Linux网络

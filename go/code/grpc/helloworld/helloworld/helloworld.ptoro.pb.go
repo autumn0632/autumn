@@ -19,10 +19,10 @@ var _ = fmt.Errorf
 var _ = math.Inf
 
 // This is a compile-time assertion to ensure that this generated file
-// is compatible with the proto package it is being compiled against.
+// is compatible with the proto pk it is being compiled against.
 // A compilation error at this line likely means your copy of the
-// proto package needs to be updated.
-const _ = proto.ProtoPackageIsVersion3 // please upgrade the proto package
+// proto pk needs to be updated.
+const _ = proto.ProtoPackageIsVersion3 // please upgrade the proto pk
 
 // The request message containing the user's name.
 type HelloRequest struct {
@@ -134,7 +134,7 @@ var _ context.Context
 var _ grpc.ClientConnInterface
 
 // This is a compile-time assertion to ensure that this generated file
-// is compatible with the grpc package it is being compiled against.
+// is compatible with the grpc pk it is being compiled against.
 const _ = grpc.SupportPackageIsVersion6
 
 // GreeterClient is the client API for Greeter service.

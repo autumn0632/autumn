@@ -14,7 +14,7 @@
 
  在 Go 的 server 里，通常每来一个请求都会启动若干个 goroutine 同时工作：有些去数据库拿数据，有些调用下游接口获取相关数据……  **多个goroutine协调工作涉及通信，同步，通知，退出 四个方面**.
 
-![](./png/go-request.png)
+![](../../blog/png/go-request.png)
 
 
 
@@ -22,7 +22,7 @@
 
 context 用来解决 goroutine 之间`退出通知`、`元数据传递`的功能。
 
-![](./png/go-request2.png)
+![](../../blog/png/go-request2.png)
 
 # 三、context 使用
 

@@ -2,6 +2,7 @@ package base
 
 import (
 	"fmt"
+	"log"
 	"testing"
 )
 
@@ -15,10 +16,9 @@ func Test(t *testing.T) {
 	fmt.Printf("1: %#v, %#v\n", a, a["a"])
 	fmt.Printf("2: %#v, %#v\n", b, b["b"])
 
-
 	test := make(map[string]string)
 	//test["a"] = "a"
-	fmt.Printf("3: %p, %#v, %#v\n", test, test, test["aaa"])  // test["aaa"] 默认值为""
+	fmt.Printf("3: %p, %#v, %#v\n", test, test, test["aaa"]) // test["aaa"] 默认值为""
 
 	test1 := make(map[string]interface{})
 	fmt.Printf("4: %p, %#v, %#v\n", test1, test1, test1["aaa"]) // test1["aaa"] 默认值为nil
@@ -29,11 +29,43 @@ func Test(t *testing.T) {
 	test2["aaa"] = make(map[string]interface{})
 	test2["aaa"]["aaa"] = "test"
 
-
 	c := new(map[string]string)
 	fmt.Printf("new map:%p %#v, %#v\n", c, c, *c)
 
-	d := new(string)  // 值类型已经默认分配好内存
+	d := new(string) // 值类型已经默认分配好内存
 	fmt.Printf("new string: %#v\n", d)
+
+}
+
+func TestForRange(t *testing.T) {
+
+	slice := []int{0, 1, 2, 3}
+	myMap := make(map[int]*int)
+
+	for index, value := range slice {
+		log.Printf("%d, %p", value, &value)
+		myMap[index] = &value
+	}
+	fmt.Println("=====new map=====")
+	for key, value := range myMap {
+		fmt.Printf("map[%v]=%v\n", key, *value)
+	}
+
+}
+
+func TestForRange2(t *testing.T) {
+
+	slice := []int{0, 1, 2, 3}
+	myMap := make(map[int]*int)
+
+	for index, value := range slice {
+		name := value
+		log.Printf("%d, %p", name, &name)
+		myMap[index] = &name
+	}
+	fmt.Println("=====new map=====")
+	for key, value := range myMap {
+		fmt.Printf("map[%v]=%v\n", key, *value)
+	}
 
 }

@@ -69,3 +69,26 @@ func TestForRange2(t *testing.T) {
 	}
 
 }
+
+func TestA(t *testing.T) {
+	a := func(base int) (func(int) int, func(int) int) {
+		add := func(i int) int {
+			base += i
+			return base
+		}
+		sub := func(i int) int {
+			base -= i
+			return base
+
+		}
+
+		return add, sub
+	}
+
+	add, sub := a(100)
+
+	fmt.Println(sub(200), add(200))
+
+	fmt.Println(add(200), sub(200))
+
+}

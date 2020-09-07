@@ -1,15 +1,11 @@
-# k8s核心概念
+# k8s 基础
 
 ## 一、什么是Kubernetes
 
 **kubernetes 要解决什么问题？**
 
-
-
-
-
 * 工业级的容器编排平台
-* 自动化的容器编排平台呢，负责应用的部署、弹性和管理。
+* 自动化的容器编排平台，负责应用的部署、弹性和管理。
 * 核心功能：
   * 服务发现与负责均衡
   * 容器自动装箱（调度）
@@ -26,22 +22,22 @@
 
 ​		![](./png/k8s-1.png)
 
-**Master节点架构**
+详细图如下：
 
-Kubernetes 的 Master 包含四个主要的组件：API Server、Controller、Scheduler 以及 etcd。如下图所示：
+![](./png/k8s-0.png)
 
-![](./png/k8s-2.png)
+### 2.1 Master节点架构
+
+Kubernetes 的 Master 包含四个主要的组件：API Server、Controller、Scheduler 以及 etcd。
 
 * **API Server：**`kube-apiserver`，顾名思义是用来处理 API 操作的，Kubernetes 中所有的组件都会和 API Server 进行连接，组件与组件之间一般不进行独立的连接，都依赖于 API Server 进行消息的传送；
 * **Controller：**`kube-controller-manager`，是控制器，它用来完成对集群状态的一些管理和容器编排。比如自动对容器进行修复、自动进行水平扩张，都是由 Kubernetes 中的 Controller 来进行完成的；
 * **Scheduler：**`kube-scheduler`，是调度器，“调度器”顾名思义就是完成调度的操作，例如把一个用户提交的 Container，依据它对 CPU、对 memory 请求大小，找一台合适的节点，进行放置；
 * **etcd：**是一个分布式的一个存储系统，API Server 中所需要的这些原信息都被放置在 etcd 中，etcd 本身是一个高可用系统，通过 etcd 保证整个 Kubernetes 的 Master 组件的高可用性。
 
-**Node节点架构**
+### 2.2 Node节点架构
 
 ​		Kubernetes 的 Node 是真正运行业务负载的，每个业务负载会以 Pod 的形式运行。一个 Pod 中运行的一个或者多个容器，真正去运行这些 Pod 的组件的是叫做 **kubelet**，也就是 Node 上最为关键的组件，**它通过 API Server 接收到所需要 Pod 运行的状态，同容器运行时（比如Docker项目）进行交互**。而这个交互所依赖的，是一个称作**CRI（Container Runtime Interface）**的远程调用接口，这个接口定义了容器运行时的各项核心操作，比如：启动一个容器需要的所有参数。
-
-![](./png/k8s-3.png)
 
 ​		*正因为如此，Kubernetes 项目并不关心你部署的是什么容器运行时、使用的什么技术实现，只要你的这个容器运行时能够运行标准的容器镜像，它就可以通过实现 CRI 接入到 Kubernetes 项目当中。*
 
@@ -60,7 +56,113 @@ Kubernetes 的 Master 包含四个主要的组件：API Server、Controller、Sc
 *  API Server 接收到这次操作之后，会把这次的结果再次写到 etcd 中，然后 API Server 会通知相应的节点进行这次 Pod 真正的执行启动。
 * 相应节点的 kubelet 会得到这个通知，kubelet 就会去调 Container runtime 来真正去启动配置这个容器和这个容器的运行环境，去调度 Storage Plugin 来去配置存储，network Plugin 去配置网络。
 
-## 三、Kubernetes的核心概念与API
+
+
+## 三、Kubernetes 的对象
+
+### 3.1 什么是对象
+
+在 Kubernetes 系统中，*Kubernetes 对象* 是持久化的实体。 Kubernetes 使用这些实体去表示整个集群的状态。特别地，它们描述了如下信息：
+
+- 哪些容器化应用在运行（以及在哪些节点上）
+- 可以被应用使用的资源
+- 关于应用运行时表现的策略，比如重启策略、升级策略，以及容错策略
+
+Kubernetes 对象是 “目标性记录” —— 一旦创建对象，Kubernetes 系统将持续工作以确保对象存在。 通过创建对象，本质上是在告知 Kubernetes 系统，所需要的集群工作负载看起来是什么样子的， 这就是 Kubernetes 集群的 **期望状态（Desired State）**。
+
+### 3.3 如何描述对象
+
+​		创建 Kubernetes 对象时，必须提供对象的规约，用来描述该对象的期望状态， 以及关于对象的一些基本信息（例如名称）。 当使用 Kubernetes API 创建对象时（或者直接创建，或者基于`kubectl`）， API 请求必须在请求体中包含 JSON 格式的信息。 **大多数情况下，需要在 .yaml 文件中为 `kubectl` 提供这些信息**。 `kubectl` 在发起 API 请求时，将这些信息转换成 JSON 格式。
+
+如下yaml所示：
+
+```yaml
+apiVersion: apps/v1 # for versions before 1.9.0 use apps/v1beta2
+kind: Deployment
+metadata:
+  name: nginx-deployment
+spec:
+  selector:
+    matchLabels:
+      app: nginx
+  replicas: 2 # tells deployment to run 2 pods matching the template
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:1.14.2
+        ports:
+        - containerPort: 80
+```
+
+**必须字段**
+
+​	在想要创建的 Kubernetes 对象对应的 `.yaml` 文件中，需要配置如下的字段：
+
+- `apiVersion` - 创建该对象所使用的 Kubernetes API 的版本
+- `kind` - 想要创建的对象的类别
+- `metadata` - 帮助唯一性标识对象的一些数据，包括一个 `name` 字符串、UID 和可选的 `namespace`
+
+也需要提供对象的 `spec` 字段。 对象 `spec` 的精确格式对每个 Kubernetes 对象来说是不同的，包含了特定于该对象的嵌套字段。 [Kubernetes API 参考](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.19/) 能够帮助我们找到任何我们想创建的对象的 spec 格式。 例如，可以从 [core/v1 PodSpec](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.19/#podspec-v1-core) 查看 `Pod` 的 `spec` 格式， 并且可以从 [apps/v1 DeploymentSpec](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.19/#deploymentspec-v1-apps) 查看 `Deployment` 的 `spec` 格式。
+
+
+
+> ### 对象规约（Spec）与状态（Status）
+>
+> 几乎每个 Kubernetes 对象包含两个嵌套的对象字段，它们负责管理对象的配置： 对象 *`spec`（规约）* 和 对象 *`status`（状态）* 。 对于具有 `spec` 的对象，必须在创建对象时设置其内容，描述你希望对象所具有的特征： *期望状态（Desired State）* 。
+>
+> `status` 描述了对象的 *当前状态（Current State）*，它是由 Kubernetes 系统和组件 设置并更新的。在任何时刻，Kubernetes [控制平面](https://kubernetes.io/zh/docs/reference/glossary/?all=true#term-control-plane) 都一直积极地管理着对象的实际状态，以使之与期望状态相匹配。
+>
+> 例如，Kubernetes 中的 Deployment 对象能够表示运行在集群中的应用。 当创建 Deployment 时，可能需要设置 Deployment 的 `spec`，以指定该应用需要有 3 个副本运行。 Kubernetes 系统读取 Deployment 规约，并启动我们所期望的应用的 3 个实例 —— 更新状态以与规约相匹配。 如果这些实例中有的失败了（一种状态变更），Kubernetes 系统通过执行修正操作 来响应规约和状态间的不一致 —— 在这里意味着它会启动一个新的实例来替换。
+
+
+
+### 3.4 如何操作创建
+
+​		操作 Kubernetes 对象 —— 无论是创建、修改，或者删除 —— 需要使用 [Kubernetes API](https://kubernetes.io/zh/docs/concepts/overview/kubernetes-api)。 比如，当使用 `kubectl` 命令行接口时，CLI 会执行必要的 Kubernetes API 调用， 也可以在程序中使用 [客户端库](https://kubernetes.io/zh/docs/reference/using-api/client-libraries/)直接调用 Kubernetes API。
+
+​		使用类似于上面的 `.yaml` 文件来创建 Deployment的一种方式是使用 `kubectl` 命令行接口（CLI）中的 [`kubectl apply`](https://kubernetes.io/docs/reference/generated/kubectl/kubectl-commands#apply) 命令， 将 `.yaml` 文件作为参数。下面是一个示例：
+
+```shell
+kubectl apply -f https://k8s.io/examples/application/deployment.yaml --record
+```
+
+输出类似如下这样：
+
+```
+deployment.apps/nginx-deployment created
+```
+
+
+
+## 四、kubernets 的API
+
+​	Kubernetes API 是由 **HTTP+JSON** 组成的：用户访问的方式是 HTTP，访问的 API 中 content 的内容是 JSON 格式的。
+
+​	Kubernetes 的 kubectl 也就是 command tool，Kubernetes UI，或者有时候用 curl，直接与 Kubernetes 进行沟通，都是使用 HTTP + JSON 这种形式。
+
+​		获取pod资源示例：
+
+​		![](./png/k8s-5.png)
+
+​	参考链接：[Kubernetes API](https://kubernetes.io/zh/docs/concepts/overview/kubernetes-api)
+
+# k8s 进阶
+
+
+
+## 五、pod详解
+
+
+
+## 六、控制器模型
+
+
+
+## 七、service 详解
 
 #### Pod
 
@@ -95,30 +197,9 @@ Kubernetes 的 Master 包含四个主要的组件：API Server、Controller、Sc
 
 #### Kubernetes API
 
-​		Kubernetes API 是由 **HTTP+JSON** 组成的：用户访问的方式是 HTTP，访问的 API 中 content 的内容是 JSON 格式的。
+​	
 
-​		Kubernetes 的 kubectl 也就是 command tool，Kubernetes UI，或者有时候用 curl，直接与 Kubernetes 进行沟通，都是使用 HTTP + JSON 这种形式。
+# k8s高级
 
-​		获取pod资源示例：
+## k8s网络模型
 
-​		![](./png/k8s-5.png)
-
-		> 去提交一个 Pod，或者 get 一个 Pod 的时候，它的 content 内容都是用 JSON 或者是 YAML 表达的。上图中有个 yaml 的例子，在这个 yaml file 中，对 Pod 资源的描述也分为几个部分：
-		>
-		> * api version：apiVersion
-		>
-		> * 操作的资源：kind
-		>
-		> * 元数据：metadata
-		>
-		>   * name
-		>
-		>   * labels，标签，可以是一组 KeyValuePair。
-		>
-		>     >  label 是可以被 selector，也就是选择器所查询的。这个能力实际上跟我们的 sql 类型的 select 语句是非常相似的。通过 label，kubernetes 的 API 层就可以对这些资源进行一个筛选，那这些筛选也是 kubernetes 对资源的集合所表达默认的一种方式。
-		>
-		>   * annotation，对资源的额外的一些用户层次的描述。
-		>
-		> * 希望达到的预期状态：spec
-		>
-		>   > Spec 也就是我们希望 Pod 达到的一个预期的状态。比如说它内部需要有哪些 container 被运行；比如说这里面有一个 nginx 的 container，它的 image 是什么？它暴露的 port 是什么？

@@ -1,37 +1,51 @@
 # kubeadm 快速部署kubernetes集群
 
-​		Kubernetes集群环境包括Master节点/node节点，Master 节点主要包含了三个Kubernetes项目中最最最重要的组件：`apiserver`，`scheduler`，`controller-manager`,
+	## 一、kubeadm 概述
 
-* `apiserver`：提供了管理集群的API接口
+​	Kubeadm 是一个工具，它提供了 `kubeadm init` 以及 `kubeadm join` 这两个命令作为快速创建 kubernetes 集群的最佳实践。 需要注意的是，它被故意设计为只关心启动集群，而不是准备节点环境的工作。集群启动后，安装需要的插件后，比如网络插件，集群才能正常工作。
 
-* `scheduler`：负责分配调度Pod到集群内的node节点
+​	
 
-* `controller-manager`：由一系列的控制器组成，通过apiserver监控整个集群的状态
+​	本文档使用两台设备构建Kubernetes集群：一台作为Master节点启动集群，另外一台作为工作节点加入到集群中。
 
-  ​	kuberadm是kubernetes原生的部署工具，简单快捷方便，适于新手搭建学习。但这种方式不建议直接上生产环境。
+## 二、Master节点配置
 
+### 2.1 基本配置
 
+**主机名修改**
 
-## Master节点
+```shell
+hostnamectl set-hostname kubernetes01
+```
 
-### 1.0 关闭交换空间
+修改/etc/hosts文件
+
+```
+[root@kubernetes01 ~]# cat /etc/hosts
+127.0.0.1       localhost       localhost.localdomain   localhost4      localhost4.localdomain4
+::1     localhost       localhost.localdomain   localhost6      localhost6.localdomain6
+# kubernetes-cluster
+10.5.0.206 kubernetes01
+```
+
+**关闭交换空间**
 
 执行`swapoff -a`， 并在`/etc/fstab`中删除对`swap`的加载，然后重启服务器
 
-### 1.1关闭防火墙
+**关闭防火墙**
 
 ```bash
 systemctl stop firewalld && systemctl disable firewalld
 ```
 
-### 1.2 检查selinux是否关闭
+**检查selinux是否关闭**
 
 ```csharp
 [root@kubernetes01 ~]# setenforce 0
 setenforce: SELinux is disabled
 ```
 
-### 1.3 提前处理路由问题
+**提前处理路由问题**
 
 ```bash
 cat > /etc/sysctl.d/k8s.conf << EOF
@@ -43,7 +57,7 @@ EOF
 sysctl --system
 ```
 
-### 1.4 安装docker-ce
+### 2.2 安装docker-ce
 
 ```bash
 # yum安装docekr-ce，版本是v18.06.1
@@ -66,7 +80,7 @@ systemctl enable docker.service ;systemctl start docker.service
 docker --version
 ```
 
-### 1.5 安装kubelet、kubectl、kubeadm
+### 2.3 安装kubelet、kubectl、kubeadm
 
 ```bash
 # 1. 配置为阿里云yum源
@@ -87,7 +101,7 @@ yum install -y kubelet-1.12.1 kubectl-1.12.1 kubeadm-1.12.1 kubernetes-cni-0.6.0
 # 安装完成后，慎用 yum update -y 进行升级
 ```
 
-### 1.6 下载kubernetes相关组件的docker镜像
+### 2.4 下载kubernetes相关组件的docker镜像
 
 ```shell
 # 由于网络原因, 使用如下脚本下载方式
@@ -116,7 +130,7 @@ k8s.gcr.io/pause                     3.1                 da86e6ba6ca1        15 
 
 ```
 
-### 1.7 使用kubeadm部署kubernetes集群master节点
+### 2.5 使用kubeadm部署kubernetes集群master节点
 
 ```bash
 [root@kubernetes01 ~]# kubeadm init --kubernetes-version=v1.12.1 
@@ -145,7 +159,9 @@ sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
 sudo chown $(id -u):$(id -g) $HOME/.kube/config
 ```
 
-### 1.8 健康状态检查
+
+
+### 2.6 健康状态检查
 
 ```bash
 # 1.查看主要组件的健康状态
@@ -160,7 +176,7 @@ NAME           STATUS     ROLES    AGE     VERSION
 kubernetes01   NotReady   master   4m15s   v1.12.1
 ```
 
-### 1.9 部署网路插件weave
+### 2.7 部署网路插件weave
 
 ```bash
 [root@kubernetes01 ~]# kubectl apply -f https://git.io/weave-kube-1.6
@@ -177,7 +193,7 @@ NAME                STATUS   ROLES    AGE   VERSION
 kubernetes-master   Ready    master   21m   v1.12.1
 ```
 
-### 1.10 部署可视化插件
+### 2.8 部署可视化插件
 
 需要注意的是，由于 Dashboard 是一个 Web Server，很多人经常会在自己的公有云上无意地暴露 Dashboard 的端口，从而造成安全隐患。所以，1.7 版本之后的 Dashboard 项目部署完成后，默认只能通过 Proxy 的方式在本地访问。访问方式待研究
 
@@ -228,7 +244,7 @@ token:      eyJhbGciOiJSUzI1NiIsImtpZCI6IiJ9.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2V
 访问https://10.5.0.206:30001通过token登陆控制面板,注意是https协议！
 ```
 
-### 1.11部署容器存储插件
+### 2.9 部署容器存储插件
 
 Rook项目是基于Ceph的Kubernetes存储插件，一个可用于生产级别的做持久化存储的插件，
 
@@ -242,22 +258,21 @@ kubectl apply -f operator.yaml
 kubectl apply -f cluster.yaml
 ```
 
-在master节点上处理，要注意污点处理
+
+
+## 三、Node节点配置
+
+在node节点上，将2.0到2.4的操作再次配置一遍，然后执行2.5节中的`kuberadm join`命令。
 
 
 
-## Node节点
-
-安装`docer-ce`、
-
-
-
-
-
-## 命令速查
+## 四、命令速查
 
 > 1. kubectl describe pod kubernetes-dashboard-65c76f6c97-hmbd7 --namespace=kube-system 
 > 2. kubectl delete -f kubernetes-dashboard.yaml 
 > 3. kubectl get pods --all-namespaces
 > 4. kubectl delete deployments,svc my-nginx
 
+## 五、参考连接
+
+1. [kubeadm概述](https://kubernetes.io/zh/docs/reference/setup-tools/kubeadm/kubeadm/)

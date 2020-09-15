@@ -1,11 +1,29 @@
-go语言中的io操作主要分布在以下几个包中国：
+go语言中的io操作主要分布在以下几个包中：
 
-* [io](http://docs.studygolang.com/pkg/io/) 为 IO 原语（I/O primitives）提供基本的接口
-* [io/ioutil](http://docs.studygolang.com/pkg/io/ioutil/) 封装一些实用的 I/O 函数
-* [fmt](http://docs.studygolang.com/pkg/fmt/) 实现格式化 I/O，类似 C 语言中的 printf 和 scanf
-* [bufio](http://docs.studygolang.com/pkg/bufio/) 实现带缓冲I/O
+* [io](http://docs.studygolang.com/pkg/io/) 
 
+    属于底层接口定义库，其作用是定义一些基本接口和一些基本常量，并对这些接口的作用给出说明，常见的接口有`Reader`、`Writer`等。
+    
+* [io/ioutil](http://docs.studygolang.com/pkg/io/ioutil/) 
 
+    ioutil库包含在io目录下，它的主要作用是作为一个工具包，里面有一些比较实用的函数，比如 ReadAll(从某个源读取数据)、ReadFile（读取文件内容）、WriteFile（将数据写入文件）、ReadDir（获取目录）
+   
+* [os]()
+    
+    os库主要是跟操作系统打交道，所以文件操作基本都会跟os库挂钩，比如创建文件、打开一个文件等。这个库往往会和ioutil库、bufio库等配合使用
+    
+* [bufio](http://docs.studygolang.com/pkg/bufio/) 
+
+    理解为在io库上再封装一层，加上了缓存功能。
+    
+    > 1. `bufio VS ioutil`：两者都提供了对文件的读写功能，唯一的不同就是bufio多了一层缓存的功能，这个优势主要体现读取大文件的时候（ioutil.ReadFile是一次性将内容加载到内存，如果内容过大，很容易爆内存）
+    > 2.  `bufio VS bytes.Buffer`：两者都提供一层缓存功能，它们的不同主要在于 bufio 针对的是文件到内存的缓存，而 bytes.Buffer 的针对的是内存到内存的缓存
+    >
+
+* [bytes]() 和 [strings]()
+
+    `bytes`和`strings`库都实现了Reader接口，所以它们的不同主要在于针对的对象不同。bytes针对的是字节，strings针对的是字符串。
+    另一个区别就是 bytes还带有Buffer的功能，但是 strings没提供。
 
 # 一、io-基本的io接口
 

@@ -92,3 +92,29 @@ func TestA(t *testing.T) {
 	fmt.Println(add(200), sub(200))
 
 }
+
+func TestMap(t *testing.T) {
+	var te map[string]map[string]float64
+
+	fmt.Printf("%v\n", te)
+	fmt.Printf("%p\n", te)
+	if te == nil {
+		fmt.Println("te is nil")
+	}
+	te = map[string]map[string]float64{
+
+	}
+	fmt.Printf("%v\n", te)
+	fmt.Printf("%p\n", te)
+	if te == nil {
+		fmt.Println("te is nil")
+	}
+
+}
+
+func TestString(t *testing.T) {
+	var data string
+
+	fmt.Println(len(data))
+
+}

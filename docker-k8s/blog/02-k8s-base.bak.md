@@ -1,4 +1,4 @@
-#  k8s 基础
+# k8s 基础
 
 ## 一、什么是Kubernetes
 
@@ -152,7 +152,9 @@ deployment.apps/nginx-deployment created
 
 # k8s 进阶
 
-## 一、pod详解
+
+
+## 五、pod详解
 
 ### pod 网络
 
@@ -171,6 +173,14 @@ Pod 里的所有容器，共享的是同一个 Network Namespace。它的实现�
 
 而对于同一个 Pod 里面的所有用户容器来说，它们的进出流量，也可以认为都是通过 Infra 容器完成的。
 
+## 六、控制器模型
+
+
+
+## 七、service 详解
+
+
+
 ​	
 
 # Kubernetes高级
@@ -183,7 +193,7 @@ Pod 里的所有容器，共享的是同一个 Network Namespace。它的实现�
 * Docker背后的网络基础是什么？
 * Docker自身的网络模型和局限是什么？
 * Kubernetes的网络组件之间时怎么通信的？
-* 外部如何访问Kubernetes集群？
+* 让步如何访问Kubernetes集群？
 * 有哪些开源组件支持Kubernetes的网络模型？
 
 ### 1.1 k8s 网络模型
@@ -217,6 +227,8 @@ Pod 里的所有容器，共享的是同一个 Network Namespace。它的实现�
 2. Pod与容器之间的通信
 3. Pod与Service之间的通信
 4. 集群外部与内部组件之间的通信。
+
+
 
 
 

@@ -182,7 +182,7 @@ Pod 里的所有容器，共享的是同一个 Network Namespace。它的实现�
 * Kubernetes的网络模型是什么？
 * Docker背后的网络基础是什么？
 * Docker自身的网络模型和局限是什么？
-* Kubernetes的网络组件之间时怎么通信的？
+* Kubernetes的网络组件之间是怎么通信的？
 * 外部如何访问Kubernetes集群？
 * 有哪些开源组件支持Kubernetes的网络模型？
 
@@ -211,11 +211,11 @@ Pod 里的所有容器，共享的是同一个 Network Namespace。它的实现�
 
 ### 1.2 k8s 的网络实现
 
-**k8s的网络场景**：
+KUbernetes网络的设计致力于解决以下问题：
 
 1. 容器与容器之间的直接通信
-2. Pod与容器之间的通信
-3. Pod与Service之间的通信
+2. 抽象的Pod与Pod之间的通信
+3. Pod到Service之间的通信
 4. 集群外部与内部组件之间的通信。
 
 

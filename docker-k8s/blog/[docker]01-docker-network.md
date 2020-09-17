@@ -57,3 +57,40 @@ clone(int (*child_func)(void *), void *child_stack, int flags, void *arg);
 
 ​		Linux系统包含一个完整的路由功能。 当IP层在处理数据发送或者转发时，会使用路由表来决定发往哪里。  如果主机与目的主机直接相连， 那么主机可以直接发送IP报文到目的主机，没有直接相连， 那么主机会将IP报文发送给默认的路由器， 然后由路由器来决定往哪里发送IP报文。     
 
+
+
+## 二、Docker网络实现
+
+标准的Docker支持四种网络模式：**host模式**、**container模式**、**none模式**和默认的**bridge模式**。在Kubernetes管理模式下通常只会用到**bridge模式**，所以此处只介绍在bridge模式下Docker是如何支持网络的。流程如下：
+
+1. Docker Daemon 第一次启动时创建docker0网桥。
+2. Docker Daemon 利用 veth pair 技术,在宿主机上创建两个虚拟网络接口设备 假设为veth0 和 veth1，而 veth pair 技术的特性可以保证无论哪一个 veth 接收到网络报文,都会将报文传输给另一方。
+3. Docker Daemon 将 veth0 附加到  docker0 网桥上，保证宿主机的网络报文可以发往 veth0
+4. Docker Daemon 将 veth1 添加到 Docker Container 所属的 namespace 下,并被改名为 eth0
+
+网络逻辑如下图所示：
+
+​	<img src="./png/docker_bridge.png" style="zoom:67%;" />
+
+优势：
+
+　　保证宿主机的网络报文若发往 veth0,则立即会被 eth0 接收，实现宿主机到Docker Container 网络的联通性，同时,也保证 Docker Container 单独使用 eth0，实现容器网络环境的隔离性。
+
+劣势：
+
+　　该模式下 Docker Container 不具有一个公有 IP,即和宿主机的 eth0 不处于同一个网段。导致的结果是宿主机以外的世界不能直接和容器进行通信。虽然 NAT 模式经过中间处理实现了这一点，但是 NAT 模式仍然存在问题与不便,如:容器均需要在宿主机上竞争端口，容器内部服务的访问者需要使用服务发现获知服务的外部端口等。
+
+
+
+## 三、docker的网络局限
+
+Docker从一开始就没有考虑到多主机互联的解决方案。在Docker成名之后，重新开始重视网络解决方案。一类是 Docker 在 1.9 版本中引入Libnetwork项目，对跨节点网络的原生支持；一类是通过插件（plugin）方式引入的第三方实现方案，比如 Flannel，Calico 等等。
+
+
+
+## 四、参考资料
+
+1. [network namespace 实战操作](https://mp.weixin.qq.com/s/PbHe9OP8EkRwmOYnjPz2uA)
+
+2. [从 VETH 到 Kubernetes 网络通信剖析](https://www.infoq.cn/article/fvRGAt1UUSqUl0P3QULd)
+

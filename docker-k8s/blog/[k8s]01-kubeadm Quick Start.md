@@ -266,13 +266,20 @@ kubectl apply -f cluster.yaml
 
 
 
-## 四、命令速查
+## 四、下一步
+
+1. kubeadm为初学者提供了简单快速的搭建集群方式。若要深入理解Master/node的各个组件，可以使用二进制文件进行安装搭建
+2. 部署可视化插件时，使用的是Node IP方式，这是一种不安全的对外暴露服务的方式，请尝试安全的暴露服务的方法。
+
+## 五、附录
+
+### 1. 命令速查
 
 > 1. kubectl describe pod kubernetes-dashboard-65c76f6c97-hmbd7 --namespace=kube-system 
 > 2. kubectl delete -f kubernetes-dashboard.yaml 
 > 3. kubectl get pods --all-namespaces
 > 4. kubectl delete deployments,svc my-nginx
 
-## 五、参考连接
+### 2. 参考连接
 
 1. [kubeadm概述](https://kubernetes.io/zh/docs/reference/setup-tools/kubeadm/kubeadm/)

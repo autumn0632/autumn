@@ -2,7 +2,7 @@
 
 ## 一、什么是Kubernetes
 
-
+​	
 
 ## 二、kubernetes 的架构
 
@@ -31,7 +31,7 @@ Kubernetes 的 Master 包含四个主要的组件：API Server、Controller、Sc
 
 ​		*而具体的容器运行时，比如 Docker 项目，则一般通过 OCI 这个容器运行时规范同底层的 Linux 操作系统进行交互，即：把 CRI 请求翻译成对 Linux 操作系统的调用（操作 Linux Namespace 和 Cgroups 等）。*
 
-​		Kubernetes 并不会直接进行网络存储的操作，他们会靠 Storage Plugin 或者是网络的 Plugin 来进行操作。用户自己或者云厂商都会去写相应的 **Storage Plugin** 或者 **Network Plugin**，去完成存储操作或网络操作。
+​		kubelet 的另一个重要功能，**则是调用网络插件和存储插件为容器配置网络和持久化存储**。Kubernetes 并不会直接进行网络和存储的操作，他们会靠 Storage Plugin 或者是网络的 Plugin 来进行操作。用户自己或者云厂商都会去写相应的 **Storage Plugin** 或者 **Network Plugin**，去完成存储操作或网络操作。
 
 **各组件interaction的示例**
 
@@ -46,9 +46,11 @@ Kubernetes 的 Master 包含四个主要的组件：API Server、Controller、Sc
 
 
 
-## 三、Kubernetes 的对象
+## 三、Kubernetes 基本概念和术语
 
-### 3.1 什么是对象
+### 3.1 资源对象
+
+#### 3.1.1 什么是对象
 
 在 Kubernetes 系统中，*Kubernetes 对象* 是持久化的实体。 Kubernetes 使用这些实体去表示整个集群的状态。特别地，它们描述了如下信息：
 
@@ -58,7 +60,7 @@ Kubernetes 的 Master 包含四个主要的组件：API Server、Controller、Sc
 
 Kubernetes 对象是 “目标性记录” —— 一旦创建对象，Kubernetes 系统将持续工作以确保对象存在。 通过创建对象，本质上是在告知 Kubernetes 系统，所需要的集群工作负载看起来是什么样子的， 这就是 Kubernetes 集群的 **期望状态（Desired State）**。
 
-### 3.3 如何描述对象
+#### 3.1.2 如何描述对象
 
 ​		创建 Kubernetes 对象时，必须提供对象的规约，用来描述该对象的期望状态， 以及关于对象的一些基本信息（例如名称）。 当使用 Kubernetes API 创建对象时（或者直接创建，或者基于`kubectl`）， API 请求必须在请求体中包含 JSON 格式的信息。 **大多数情况下，需要在 .yaml 文件中为 `kubectl` 提供这些信息**。 `kubectl` 在发起 API 请求时，将这些信息转换成 JSON 格式。
 
@@ -108,7 +110,7 @@ spec:
 
 
 
-### 3.4 如何操作创建
+#### 3.1.3 如何操作创建
 
 ​		操作 Kubernetes 对象 —— 无论是创建、修改，或者删除 —— 需要使用 [Kubernetes API](https://kubernetes.io/zh/docs/concepts/overview/kubernetes-api)。 比如，当使用 `kubectl` 命令行接口时，CLI 会执行必要的 Kubernetes API 调用， 也可以在程序中使用 [客户端库](https://kubernetes.io/zh/docs/reference/using-api/client-libraries/)直接调用 Kubernetes API。
 
@@ -124,9 +126,15 @@ kubectl apply -f https://k8s.io/examples/application/deployment.yaml --record
 deployment.apps/nginx-deployment created
 ```
 
+### 3.2 Pod
 
 
-## 四、kubernets 的API
+
+### 3.3 Service
+
+
+
+### 3.4 kubernets 的API
 
 ​	Kubernetes API 是由 **HTTP+JSON** 组成的：用户访问的方式是 HTTP，访问的 API 中 content 的内容是 JSON 格式的。
 

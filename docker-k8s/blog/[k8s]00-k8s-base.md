@@ -2,7 +2,8 @@
 
 ## 一、什么是Kubernetes
 
-​	
+	1. Kubernetes是一个开源系统，用于跨多个主机管理容器化的应用程序。 它提供了用于部署，维护和扩展应用程序的基本机制。
+ 	2. ​	
 
 ## 二、kubernetes 的架构
 
@@ -48,21 +49,29 @@ Kubernetes 的 Master 包含四个主要的组件：API Server、Controller、Sc
 
 ## 三、Kubernetes 基本概念和术语
 
-### 3.1 资源对象
+### 3.1 kubernets 的API
 
-#### 3.1.1 什么是对象
+​	Kubernetes API 是由 **HTTP+JSON** 组成的：用户访问的方式是 HTTP，访问的 API 中 content 的内容是 JSON 格式的。
 
-在 Kubernetes 系统中，*Kubernetes 对象* 是持久化的实体。 Kubernetes 使用这些实体去表示整个集群的状态。特别地，它们描述了如下信息：
+​	Kubernetes 的 kubectl 也就是 command tool，Kubernetes UI，或者有时候用 curl，直接与 Kubernetes 进行沟通，都是使用 HTTP + JSON 这种形式。
 
-- 哪些容器化应用在运行（以及在哪些节点上）
-- 可以被应用使用的资源
-- 关于应用运行时表现的策略，比如重启策略、升级策略，以及容错策略
+​		获取pod资源示例：
 
-Kubernetes 对象是 “目标性记录” —— 一旦创建对象，Kubernetes 系统将持续工作以确保对象存在。 通过创建对象，本质上是在告知 Kubernetes 系统，所需要的集群工作负载看起来是什么样子的， 这就是 Kubernetes 集群的 **期望状态（Desired State）**。
+​		![](./png/k8s-5.png)
 
-#### 3.1.2 如何描述对象
+​	参考链接：[Kubernetes API](https://kubernetes.io/zh/docs/concepts/overview/kubernetes-api)
 
-​		创建 Kubernetes 对象时，必须提供对象的规约，用来描述该对象的期望状态， 以及关于对象的一些基本信息（例如名称）。 当使用 Kubernetes API 创建对象时（或者直接创建，或者基于`kubectl`）， API 请求必须在请求体中包含 JSON 格式的信息。 **大多数情况下，需要在 .yaml 文件中为 `kubectl` 提供这些信息**。 `kubectl` 在发起 API 请求时，将这些信息转换成 JSON 格式。
+
+
+### 3.2 资源对象
+
+#### 3.2.1 什么是资源对象
+
+​		Kubernetes中的大部分概念如Node、Pod、Service、Deployment等都可以看成一种资源对象。几乎所有的资源对象都可以通过Kubernetes提供的kubectl工具（或者API编程调用）执行增、删、改、查等操作并将其保存在etcd中持久化存储。从这个角度看，可以把k8s看成一个**高度自动化的资源控制系统**，它通过跟踪对比etcd库里保存的**资源期望状态**与当前环境中**实际资源状态**的差异来实现自动控制和自动纠错的高级功能。
+
+#### 3.2.2 如何描述资源对象
+
+​		创建 Kubernetes 对象时，必须提供对象的规约-**spec**，用来描述该对象的期望状态， 以及关于对象的一些基本信息（例如名称）。 当使用 Kubernetes API 创建对象时（或者直接创建，或者基于`kubectl`）， API 请求必须在请求体中包含 JSON 格式的信息。 **大多数情况下，需要在 .yaml 文件中为 `kubectl` 提供这些信息**。 `kubectl` 在发起 API 请求时，将这些信息转换成 JSON 格式。
 
 如下yaml所示：
 
@@ -110,7 +119,7 @@ spec:
 
 
 
-#### 3.1.3 如何操作创建
+#### 3.2.3 如何操作创建
 
 ​		操作 Kubernetes 对象 —— 无论是创建、修改，或者删除 —— 需要使用 [Kubernetes API](https://kubernetes.io/zh/docs/concepts/overview/kubernetes-api)。 比如，当使用 `kubectl` 命令行接口时，CLI 会执行必要的 Kubernetes API 调用， 也可以在程序中使用 [客户端库](https://kubernetes.io/zh/docs/reference/using-api/client-libraries/)直接调用 Kubernetes API。
 
@@ -126,35 +135,13 @@ kubectl apply -f https://k8s.io/examples/application/deployment.yaml --record
 deployment.apps/nginx-deployment created
 ```
 
-### 3.2 Pod
+### 3.3 Pod
 
+#### 3.3.1 什么是pod
 
+​		Pod，是 Kubernetes 项目中最小的 API 对象。专业一点的说法，是 Kubernetes 项目的原子调度单位。每个pod都由一个特殊的根容器infra和一个或若干个紧密相关的用户业务容器组成。在这个 Pod 中，Infra 容器永远都是第一个被创建的容器，而其他用户定义的容器，则通过 Join Network Namespace 的方式，与 Infra 容器关联在一起。如下图所示：
 
-### 3.3 Service
-
-
-
-### 3.4 kubernets 的API
-
-​	Kubernetes API 是由 **HTTP+JSON** 组成的：用户访问的方式是 HTTP，访问的 API 中 content 的内容是 JSON 格式的。
-
-​	Kubernetes 的 kubectl 也就是 command tool，Kubernetes UI，或者有时候用 curl，直接与 Kubernetes 进行沟通，都是使用 HTTP + JSON 这种形式。
-
-​		获取pod资源示例：
-
-​		![](./png/k8s-5.png)
-
-​	参考链接：[Kubernetes API](https://kubernetes.io/zh/docs/concepts/overview/kubernetes-api)
-
-# k8s 进阶
-
-## 一、pod详解
-
-### pod 网络
-
-Pod 里的所有容器，共享的是同一个 Network Namespace。它的实现需要使用一个中间容器，这个容器叫作 Infra 容器。在这个 Pod 中，Infra 容器永远都是第一个被创建的容器，而其他用户定义的容器，则通过 Join Network Namespace 的方式，与 Infra 容器关联在一起。如下图所示：
-
-![](./png/infor.png)
+<img src="./png/infor.png" style="zoom: 80%;" />
 
 > Infra 容器一定要占用极少的资源，所以它使用的是一个非常特殊的镜像，叫作：k8s.gcr.io/pause。这个镜像是一个用汇编语言编写的、永远处于“暂停”状态的容器，解压后的大小也只有 100~200 KB 左右。
 
@@ -167,7 +154,36 @@ Pod 里的所有容器，共享的是同一个 Network Namespace。它的实现�
 
 而对于同一个 Pod 里面的所有用户容器来说，它们的进出流量，也可以认为都是通过 Infra 容器完成的。
 
-​	
+#### 3.3.2 pod的使用
+
+​		围绕着容器和 Pod 不断向真实的技术场景扩展，我们就能够摸索出一幅如下所示的 Kubernetes 项目核心功能的“全景图”。
+
+![](./png/pod.png)
+
+	1. 从容器这个最基础的概念出发，首先遇到了容器间“紧密协作”关系的难题，于是就扩展到了 Pod；
+ 	2. 有了 Pod 之后，我们希望能一次启动多个应用的实例，这样就需要 Deployment 这个 Pod 的多实例管理器；
+ 	3. 而有了这样一组相同的 Pod 后，我们又需要通过一个固定的 IP 地址和端口以负载均衡的方式访问它，于是就有了 Service。
+ 	4. 如果现在两个不同 Pod 之间不仅有“访问关系”，还要求在发起时加上授权信息。于是就有了Secret 的对象。
+
+**除了应用与应用之间的关系外，应用运行的形态是影响“如何容器化这个应用”的第二个重要因素。**
+
+5. Job，用来描述一次性运行的 Pod（比如，大数据任务）
+6. DaemonSet，用来描述每个宿主机上必须且只能运行一个副本的守护进程服务
+7. CronJob，则用于描述定时任务
+
+
+
+所以，我们使用k8s的方法如下：
+
+**首先，通过一个“编排对象”，比如 Pod、Job、Deployment 等，来描述试图管理的应用；**
+
+**然后，再为它定义一些“服务对象”，比如 Service、Secret、Horizontal Pod Autoscaler（自动水平扩展器）等。这些对象，会负责具体的平台级功能。**
+
+
+
+### 3.4 Service
+
+​		Kubernetes的Service定义了一个服务的访问入口地址-**Cluster IP**，外部或前端的应用（frontend pod）通过这个地址访问其背后的一组由pod副本组成的集群实例。我们的系统最终是由多个提供不同业务能力又批次独立的**微服务单元**组成，服务之间通过TCP/IP进行通信。
 
 # Kubernetes高级
 
@@ -216,7 +232,9 @@ KUbernetes网络的设计致力于解决以下问题：
 
 
 
-**容器之前的直接通信**
+#### 1.2.1 容器到容器的通信
 
-* 同一个Pod之间的不同容器因为共享同一个网络命名空间，所以可以直接通过localhost直接通信。
+​	同一个Pod之间的不同容器因为共享同一个网络命名空间，所以可以直接通过localhost直接通信。
+
+#### 1.2.2 Pod之间的通信
 

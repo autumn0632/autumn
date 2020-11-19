@@ -37,7 +37,7 @@
 
 **镜像**
 
-* docker images ls：显示顶层镜像
+* docker image ls：显示顶层镜像
 
   > * `-a`：列出所有镜像
   > * `-q`：只返回镜像ID
@@ -49,9 +49,10 @@
 
 * docker image rm：镜像删除
 
-**镜像**
+**容器**
 
-* docker container ls：容器查看
+* docker container ls -a：容器查看
+* docker container prune ：删除所有停止的容器
 
 ### 3. 创建镜像
 

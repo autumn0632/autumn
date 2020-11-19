@@ -1,10 +1,8 @@
 # kubeadm 快速部署kubernetes集群
 
-	## 一、kubeadm 概述
+## 一、kubeadm 概述
 
 ​	Kubeadm 是一个工具，它提供了 `kubeadm init` 以及 `kubeadm join` 这两个命令作为快速创建 kubernetes 集群的最佳实践。 需要注意的是，它被故意设计为只关心启动集群，而不是准备节点环境的工作。集群启动后，安装需要的插件后，比如网络插件，集群才能正常工作。
-
-​	
 
 ​	本文档使用两台设备构建Kubernetes集群：一台作为Master节点启动集群，另外一台作为工作节点加入到集群中。
 
@@ -204,6 +202,7 @@ docker tag  anjia0532/google-containers.kubernetes-dashboard-amd64:v1.10.0 k8s.g
 docker rmi  anjia0532/google-containers.kubernetes-dashboard-amd64:v1.10.0 
 # 2.获取并修改可视化插件YAML文件的最后部分，便于后期通过token登陆可视化页面，这里需要特别注意的是暴露了30001端口，这如果在生产环境是极不安全的！
 [root@kubernetes01 ~]# wget https://raw.githubusercontent.com/kubernetes/dashboard/v1.10.1/src/deploy/recommended/kubernetes-dashboard.yaml
+> 通过wget的方式可能拒绝访问，这次可以将链接拷贝到浏览器中访问，将内容赋值出来。
 [root@kubernetes01 ~]# tail -n 20 kubernetes-dashboard.yaml
         effect: NoSchedule
 
@@ -241,7 +240,25 @@ kubernetes-dashboard-65c76f6c97-f29nm   1/1     Running   0          3m8s
 Name:         namespace-controller-token-mt4sh
 Type:  kubernetes.io/service-account-token
 token:      eyJhbGciOiJSUzI1NiIsImtpZCI6IiJ9.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2VhY2NvdW50Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9uYW1lc3BhY2UiOiJrdWJlLXN5c3RlbSIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VjcmV0Lm5hbWUiOiJuYW1lc3BhY2UtY29udHJvbGxlci10b2tlbi1tdDRzaCIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VydmljZS1hY2NvdW50Lm5hbWUiOiJuYW1lc3BhY2UtY29udHJvbGxlciIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VydmljZS1hY2NvdW50LnVpZCI6ImY5YzE3YWQzLTUxYzItMTFlOS05NWZiLTAwMTYzZTBlNDRiYyIsInN1YiI6InN5c3RlbTpzZXJ2aWNlYWNjb3VudDprdWJlLXN5c3RlbTpuYW1lc3BhY2UtY29udHJvbGxlciJ9.W2flckBO8CrzGyJzw2aJH5obQSjy4PNSll7uHOiIXPk4dnOTEzI-BfM4C9QrNDjbNTu8gIdLHntLj1181Sf_sRMidB_vhUPg6CFA1zy3XmYH21eVqjSxEBNXMSfrJHBgXnBzaHieaXqF55_etABB0j4xLM7V-bRsQ9AB0G3cv1IYU_gYG3BozksvAObmDEY4GgCI7f0-nu2YRqOMPJPhXWzKOGUvBBPyj171Xo06QvF6p9zpTMSoLa3aV-gU4XA2nMf2_aDdgFrGVI4p95ziewyu0o-W-DiEnXW1hRtwgg-PRe3QPU9ps3TALlr3U8rwh3xVmlqnRuNGVDqzmclVdQ
-访问https://10.5.0.206:30001通过token登陆控制面板,注意是https协议！
+# 6.生成证书
+ a. 新建目录
+ 	mkdir key && cd key
+ b. 生成证书
+	openssl genrsa -out dashboard.key 2048 
+    # 192.168.5.211为node节点ip
+    openssl req -new -out dashboard.csr -key dashboard.key -subj '/CN=192.168.5.211' 
+    openssl x509 -req -in dashboard.csr -signkey dashboard.key -out dashboard.crt 
+ c. 删除原有的证书secret
+    kubectl delete secret kubernetes-dashboard-certs -n kube-system
+ d. 创建新的证书secret
+	kubectl create secret generic kubernetes-dashboard-certs --from-file=dashboard.key --from-file=dashboard.crt -n kube-system
+ e. 查看pod
+ 	kubectl get pod -n kube-system
+ f. 重启pod
+	kubectl delete pod kubernetes-dashboard-7b5bf5d559-gn4ls -n kube-system
+
+
+# 7.访问https://10.5.0.206:30001通过token登陆控制面板,注意是https协议！
 ```
 
 ### 2.9 部署容器存储插件
@@ -258,13 +275,23 @@ kubectl apply -f operator.yaml
 kubectl apply -f cluster.yaml
 ```
 
-
-
 ## 三、Node节点配置
 
 在node节点上，将2.0到2.4的操作再次配置一遍，然后执行2.5节中的`kuberadm join`命令。
 
+若`kubeadm join`信息丢失，可以在master节点上执行以下命令找回`token `和`discovery-token-ca-cert-hash`
 
+> token：
+>
+> kubeadm token list
+>
+> discovery-token-ca-cert-hash：
+>
+> openssl x509 -pubkey -in /etc/kubernetes/pki/ca.crt | openssl rsa -pubin -outform der 2>/dev/null | openssl dgst -sha256 -hex | sed 's/^.* //' 
+
+然后在node节点上执行
+
+> kubeadm join 192.168.5.211:6443 --token  xxx --discovery-token-ca-cert-hash sha256:xxx
 
 ## 四、下一步
 

@@ -118,3 +118,12 @@ func TestString(t *testing.T) {
 	fmt.Println(len(data))
 
 }
+
+func TestSlice(t *testing.T) {
+	data := make([]int, 1)
+
+	data = append(data, 1,2,3,4,5)
+
+	fmt.Println(data)
+
+}
